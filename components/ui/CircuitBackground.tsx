@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
-import { MotionPathPlugin } from 'gsap/MotionPathPlugin'
 
 interface CircuitBackgroundProps {
   opacity?: number
@@ -10,61 +9,74 @@ interface CircuitBackgroundProps {
   className?: string
 }
 
-// PCB traces — H/V only, no curves
+// 12 H/V traces in a 0-100 viewBox
+// These radiate from a notional CPU near center (50, 50)
 const TRACES = [
-  // Main spine
-  'M 0 50 H 15 V 38 H 35 V 50 H 55 V 44 H 65',
-  // Left branch up
-  'M 15 38 V 20 H 28 V 14 H 42',
-  // Left branch down
-  'M 35 50 V 62 H 24 V 72 H 42',
-  // Right section
-  'M 65 44 H 80 V 32 H 96 V 44 H 100',
-  // Upper-right branch
-  'M 80 32 V 17 H 90 V 10',
-  // Lower-right branch
-  'M 96 44 V 60 H 85 V 70 H 100',
-  // Far left
-  'M 28 14 V 7 H 12',
-  // Far bottom-left
-  'M 24 72 V 82 H 8',
+  // North
+  { id: 'cb0', d: 'M 46 34 V 22 H 35 V 12 H 20 V 0' },
+  { id: 'cb1', d: 'M 54 34 V 18 H 65 V 8 H 82 V 0' },
+  // South
+  { id: 'cb2', d: 'M 46 66 V 78 H 30 V 88 H 15 V 100' },
+  { id: 'cb3', d: 'M 54 66 V 80 H 70 V 90 H 88 V 100' },
+  // East
+  { id: 'cb4', d: 'M 66 46 H 78 V 36 H 90 V 26 H 100' },
+  { id: 'cb5', d: 'M 66 54 H 80 V 62 H 92 V 72 H 100' },
+  // West
+  { id: 'cb6', d: 'M 34 46 H 20 V 36 H 10 V 24 H 0' },
+  { id: 'cb7', d: 'M 34 54 H 18 V 64 H 8 V 76 H 0' },
+  // Cross connections
+  { id: 'cb8',  d: 'M 20 22 H 35', },
+  { id: 'cb9',  d: 'M 65 18 H 82', },
+  { id: 'cb10', d: 'M 15 78 H 30', },
+  { id: 'cb11', d: 'M 70 80 H 88', },
 ]
 
-// Pulse dots travel along each trace using CSS animation on a hidden SVG path
-// We use a simple "translate along path" approximation via keyframe offsets
+// Pulses on main 8 traces
+const PULSE_CONF = [
+  { id: 'cb0', dur: 3.2, begin: 0.0 },
+  { id: 'cb1', dur: 2.8, begin: 0.7 },
+  { id: 'cb2', dur: 3.6, begin: 1.4 },
+  { id: 'cb3', dur: 2.6, begin: 0.4 },
+  { id: 'cb4', dur: 3.0, begin: 1.1 },
+  { id: 'cb5', dur: 4.0, begin: 2.0 },
+  { id: 'cb6', dur: 3.4, begin: 0.9 },
+  { id: 'cb7', dur: 2.9, begin: 1.7 },
+]
+
+const NODES: [number, number][] = [
+  [35, 22], [20, 12], [65, 18], [82, 8],
+  [30, 78], [15, 88], [70, 80], [88, 90],
+  [78, 36], [90, 26], [80, 62], [92, 72],
+  [20, 36], [10, 24], [18, 64], [8, 76],
+]
 
 export default function CircuitBackground({ opacity = 0.06, animated = true, className = '' }: CircuitBackgroundProps) {
   const svgRef = useRef<SVGSVGElement>(null)
 
   useEffect(() => {
     if (!animated || typeof window === 'undefined') return
-    try {
-      gsap.registerPlugin(MotionPathPlugin)
-    } catch {
-      // MotionPathPlugin may not be available (paid) — fall back gracefully
-    }
+    const svg = svgRef.current
+    if (!svg) return
 
-    // Fallback: animate stroke-dashoffset on each trace for a pulse effect
-    const paths = svgRef.current?.querySelectorAll<SVGPathElement>('.circuit-trace')
-    if (!paths) return
-
-    paths.forEach((path, i) => {
-      const len = path.getTotalLength ? path.getTotalLength() : 100
+    // Use strokeDashoffset on the animated glow traces for a draw-and-repeat pulse
+    const glowPaths = svg.querySelectorAll<SVGPathElement>('.cb-glow')
+    glowPaths.forEach((path, i) => {
+      const len = path.getTotalLength ? path.getTotalLength() : 120
       gsap.fromTo(
         path,
-        { strokeDashoffset: len },
+        { strokeDashoffset: len, strokeDasharray: `${len} ${len}` },
         {
           strokeDashoffset: 0,
-          duration: 1.5 + i * 0.3,
-          delay: i * 0.4,
+          duration: 3 + i * 0.4,
+          delay: i * 0.5,
           ease: 'none',
           repeat: -1,
-          repeatDelay: 2,
+          repeatDelay: 1.5,
         }
       )
     })
 
-    return () => { gsap.killTweensOf(paths) }
+    return () => { gsap.killTweensOf(glowPaths) }
   }, [animated])
 
   return (
@@ -76,62 +88,80 @@ export default function CircuitBackground({ opacity = 0.06, animated = true, cla
       style={{ opacity }}
       aria-hidden="true"
     >
-      {/* Traces */}
-      {TRACES.map((d, i) => {
-        const len = 200 // approximate
-        return (
-          <path
-            key={i}
-            d={d}
-            className="circuit-trace"
-            stroke="#D4F044"
-            strokeWidth="0.4"
-            fill="none"
-            strokeDasharray={`${len} ${len}`}
-            strokeDashoffset={len}
-            vectorEffect="non-scaling-stroke"
-          />
-        )
-      })}
+      <defs>
+        <filter id="cb-glow-f" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="1.5" result="blur" />
+          <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
+      </defs>
 
-      {/* Static visible traces at low opacity */}
-      {TRACES.map((d, i) => (
+      {/* Static ambient traces (always visible, low opacity) */}
+      {TRACES.map(({ id, d }) => (
         <path
-          key={`static-${i}`}
+          key={`static-${id}`}
           d={d}
           stroke="#D4F044"
-          strokeWidth="0.3"
+          strokeWidth="0.25"
           fill="none"
-          opacity="0.4"
+          opacity="0.45"
           vectorEffect="non-scaling-stroke"
         />
       ))}
 
-      {/* Junction nodes */}
-      {[
-        [15, 38], [35, 50], [65, 44], [80, 32], [96, 44],
-        [28, 14], [24, 72], [42, 50], [55, 44], [90, 10],
-      ].map(([cx, cy], i) => (
-        <circle key={i} cx={cx} cy={cy} r="0.8" fill="#D4F044" opacity="0.7" />
+      {/* Glow layer — wide soft trace, animated when animated=true */}
+      {TRACES.map(({ id, d }) => (
+        <path
+          key={`glow-${id}`}
+          id={`${id}-glow`}
+          className="cb-glow"
+          d={d}
+          stroke="#D4F044"
+          strokeWidth="1.5"
+          fill="none"
+          opacity="0.18"
+          vectorEffect="non-scaling-stroke"
+          filter="url(#cb-glow-f)"
+        />
       ))}
 
-      {/* IC-01 component */}
-      <rect x="60" y="41" width="10" height="6" stroke="#D4F044" strokeWidth="0.4" fill="#0a0a0a" opacity="0.9" />
-      <text x="65" y="45.5" textAnchor="middle" fill="#D4F044" fontSize="2.5" fontFamily="monospace">IC-01</text>
+      {/* Travelling pulse dots using native SVG animateMotion — no GSAP plugin needed */}
+      {animated && PULSE_CONF.map(({ id, dur, begin }) => (
+        <circle key={`pulse-${id}`} r="1.2" fill="#D4F044" opacity="0.9" filter="url(#cb-glow-f)">
+          <animateMotion
+            dur={`${dur}s`}
+            repeatCount="indefinite"
+            begin={`${begin}s`}
+          >
+            <mpath href={`#${id}-glow`} />
+          </animateMotion>
+        </circle>
+      ))}
 
-      {/* PWR circle */}
-      <circle cx="28" cy="14" r="2" stroke="#D4F044" strokeWidth="0.4" fill="none" opacity="0.8" />
-      <text x="28" y="11" textAnchor="middle" fill="#D4F044" fontSize="2" fontFamily="monospace">PWR</text>
+      {/* Junction nodes */}
+      {NODES.map(([cx, cy], i) => (
+        <g key={i}>
+          <circle cx={cx} cy={cy} r="1.5" fill="#D4F044" opacity="0.15" />
+          <circle cx={cx} cy={cy} r="0.7" fill="#D4F044" opacity="0.8" />
+        </g>
+      ))}
 
-      {/* CLK box */}
-      <rect x="88" y="29" width="8" height="5" stroke="#D4F044" strokeWidth="0.4" fill="#0a0a0a" opacity="0.9" />
-      <text x="92" y="32.8" textAnchor="middle" fill="#D4F044" fontSize="2.5" fontFamily="monospace">CLK</text>
+      {/* Mini CPU at center */}
+      <rect x="40" y="40" width="20" height="20" stroke="#D4F044" strokeWidth="0.35" fill="#0a0a0a" opacity="0.7" />
+      <rect x="43" y="43" width="14" height="14" stroke="#D4F044" strokeWidth="0.2" fill="#080808" opacity="0.7" />
+      <text x="50" y="51.5" textAnchor="middle" fill="#D4F044" fontSize="2.8" fontFamily="monospace" opacity="0.6">CPU</text>
 
-      {/* GND symbol */}
-      <line x1="5" y1="80" x2="11" y2="80" stroke="#D4F044" strokeWidth="0.4" opacity="0.8" />
-      <line x1="6" y1="82" x2="10" y2="82" stroke="#D4F044" strokeWidth="0.4" opacity="0.6" />
-      <line x1="7" y1="84" x2="9"  y2="84" stroke="#D4F044" strokeWidth="0.4" opacity="0.4" />
-      <text x="8" y="79" textAnchor="middle" fill="#D4F044" fontSize="2" fontFamily="monospace">GND</text>
+      {/* Small component symbols */}
+      <rect x="17" y="9" width="6" height="4" stroke="#D4F044" strokeWidth="0.3" fill="#0a0a0a" opacity="0.6" />
+      <text x="20" y="12.5" textAnchor="middle" fill="#D4F044" fontSize="2" fontFamily="monospace" opacity="0.5">IC</text>
+
+      <rect x="79" y="5" width="6" height="4" stroke="#D4F044" strokeWidth="0.3" fill="#0a0a0a" opacity="0.6" />
+      <text x="82" y="8.5" textAnchor="middle" fill="#D4F044" fontSize="2" fontFamily="monospace" opacity="0.5">CLK</text>
+
+      {/* Capacitor symbols */}
+      <line x1="8" y1="47" x2="15" y2="47" stroke="#D4F044" strokeWidth="0.4" opacity="0.6" />
+      <line x1="8" y1="50" x2="15" y2="50" stroke="#D4F044" strokeWidth="0.4" opacity="0.6" />
+      <line x1="83" y1="47" x2="90" y2="47" stroke="#D4F044" strokeWidth="0.4" opacity="0.6" />
+      <line x1="83" y1="50" x2="90" y2="50" stroke="#D4F044" strokeWidth="0.4" opacity="0.6" />
     </svg>
   )
 }

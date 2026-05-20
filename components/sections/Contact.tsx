@@ -7,6 +7,7 @@ import { Mail, Phone, MapPin } from 'lucide-react'
 import ScanReveal from '@/components/ui/ScanReveal'
 import HUDCorners from '@/components/ui/HUDCorners'
 import DataReadout from '@/components/ui/DataReadout'
+import CircuitBackground from '@/components/ui/CircuitBackground'
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
@@ -168,6 +169,7 @@ export default function Contact() {
       className="px-6 py-28 md:py-32"
       style={{ backgroundColor: '#080808', position: 'relative' }}
     >
+      <CircuitBackground opacity={0.04} animated={true} />
       <DataReadout
         topLeft="GET.IN.TOUCH"
         topRight="RESPONSE: <24HRS"

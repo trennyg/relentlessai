@@ -37,7 +37,7 @@ export default function Hero() {
       style={{ backgroundColor: '#080808' }}
     >
       {/* PCB circuit background */}
-      <CircuitBackground opacity={0.04} animated={false} />
+      <CircuitBackground opacity={0.06} animated={true} />
 
       {/* Radial glow */}
       <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(212,240,68,0.04) 0%, transparent 70%)' }} />
