@@ -24,11 +24,13 @@ export default function Footer() {
   return (
     <footer
       className="px-6 py-8"
-      style={{
-        backgroundColor: '#080808',
-        borderTop: '1px solid #222222',
-      }}
+      style={{ backgroundColor: '#080808' }}
     >
+      {/* System status line */}
+      <div style={{ borderBottom: '1px solid #1A1A1A', paddingBottom: 12, marginBottom: 24, fontFamily: 'var(--font-dm-mono)', fontSize: 10, color: '#2A2A2A', letterSpacing: '0.08em' }}>
+        SYS: ALL SYSTEMS OPERATIONAL · UPTIME: 99.9% · BUILD: PRODUCTION
+      </div>
+      <div style={{ borderTop: '1px solid #222', paddingTop: 24 }}>
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
         {/* Left: wordmark + copyright */}
         <div className="flex flex-col items-center sm:items-start gap-2">
@@ -75,6 +77,7 @@ export default function Footer() {
             <InstagramIcon />
           </a>
         </div>
+      </div>
       </div>
     </footer>
   )

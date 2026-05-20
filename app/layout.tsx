@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { Syne, DM_Sans, DM_Mono } from 'next/font/google'
 import './globals.css'
+import ClientProvider from '@/components/ClientProvider'
+import Cursor from '@/components/Cursor'
 
 const syne = Syne({
   subsets: ['latin'],
@@ -50,7 +52,8 @@ export default function RootLayout({
     <html lang="en" className={`${syne.variable} ${dmSans.variable} ${dmMono.variable}`}>
       <body>
         <div className="grain-overlay" aria-hidden="true" />
-        {children}
+        <Cursor />
+        <ClientProvider>{children}</ClientProvider>
       </body>
     </html>
   )

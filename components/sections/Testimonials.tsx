@@ -2,11 +2,13 @@
 
 import { useReducedMotion, motion } from 'framer-motion'
 import { TESTIMONIALS } from '@/lib/constants'
+import ScanReveal from '@/components/ui/ScanReveal'
 
 export default function Testimonials() {
   const shouldReduce = useReducedMotion()
 
   return (
+    <ScanReveal>
     <section
       id="testimonials"
       className="px-6 py-28 md:py-32"
@@ -86,6 +88,7 @@ export default function Testimonials() {
         </motion.div>
       </div>
     </section>
+    </ScanReveal>
   )
 }
 

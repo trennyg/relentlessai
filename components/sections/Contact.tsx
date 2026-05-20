@@ -4,6 +4,9 @@ import { useRef, useState } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import emailjs from '@emailjs/browser'
 import { Mail, Phone, MapPin } from 'lucide-react'
+import ScanReveal from '@/components/ui/ScanReveal'
+import HUDCorners from '@/components/ui/HUDCorners'
+import DataReadout from '@/components/ui/DataReadout'
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
@@ -159,11 +162,18 @@ export default function Contact() {
   }
 
   return (
+    <ScanReveal>
     <section
       id="contact"
       className="px-6 py-28 md:py-32"
-      style={{ backgroundColor: '#080808' }}
+      style={{ backgroundColor: '#080808', position: 'relative' }}
     >
+      <DataReadout
+        topLeft="GET.IN.TOUCH"
+        topRight="RESPONSE: <24HRS"
+        bottomLeft="admin@relentlessais.com"
+        bottomRight="MUM · WORLDWIDE"
+      />
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-start">
           {/* Left: copy */}
@@ -306,8 +316,11 @@ export default function Contact() {
               )}
             </AnimatePresence>
           </motion.div>
+
+          {/* Right: form — wrapped in HUDCorners */}
         </div>
       </div>
     </section>
+    </ScanReveal>
   )
 }

@@ -1,223 +1,147 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { motion, useReducedMotion, type Variants, type Transition } from 'framer-motion'
+import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
+import HUDCorners from '@/components/ui/HUDCorners'
 
 export default function Hero() {
-  const shouldReduce = useReducedMotion()
-  const [scrolled, setScrolled] = useState(false)
-  const indicatorRef = useRef<HTMLDivElement>(null)
+  const [scrolled,   setScrolled]   = useState(false)
+  const [loaderDone, setLoaderDone] = useState(false)
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 50) setScrolled(true)
+    if (document.body.classList.contains('loader-complete')) {
+      setLoaderDone(true)
+      return
     }
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
+    const mo = new MutationObserver(() => {
+      if (document.body.classList.contains('loader-complete')) {
+        setLoaderDone(true)
+        mo.disconnect()
+      }
+    })
+    mo.observe(document.body, { attributes: true, attributeFilter: ['class'] })
+    const fb = setTimeout(() => setLoaderDone(true), 4500)
+    return () => { mo.disconnect(); clearTimeout(fb) }
   }, [])
 
-  const headline = ['We', 'build', 'digital', 'products', 'that', 'think.']
-
-  const wordVariants: Variants = {
-    hidden: { opacity: 0, y: shouldReduce ? 0 : 40 },
-    visible: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      transition: {
-        delay: 0.1 + i * 0.08,
-        duration: 0.5,
-        ease: 'easeOut',
-      } as Transition,
-    }),
-  }
-
-  const fadeUp = (delay: number): Variants => ({
-    hidden: { opacity: 0, y: shouldReduce ? 0 : 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { delay, duration: 0.5, ease: 'easeOut' } as Transition,
-    },
-  })
+  useEffect(() => {
+    const onScroll = () => { if (window.scrollY > 50) setScrolled(true) }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   return (
     <section
-      className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 overflow-hidden"
+      className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 overflow-hidden grid-bg grid-mask"
       style={{ backgroundColor: '#080808' }}
     >
-      {/* Radial gradient glow */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: 'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(212,240,68,0.04) 0%, transparent 70%)',
-        }}
-      />
+      {/* Radial glow */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(212,240,68,0.04) 0%, transparent 70%)' }} />
 
       {/* Content */}
-      <div className="relative z-10 max-w-4xl mx-auto">
-        {/* Studio label */}
+      <motion.div
+        className="relative z-10 max-w-4xl mx-auto"
+        animate={{ opacity: loaderDone ? 1 : 0 }}
+        transition={{ duration: 0.4 }}
+        initial={{ opacity: 0 }}
+      >
         <motion.p
-          initial="hidden"
-          animate="visible"
-          variants={fadeUp(0.1)}
-          className="text-xs tracking-[0.3em] uppercase mb-8"
-          style={{
-            fontFamily: 'var(--font-dm-mono)',
-            color: '#D4F044',
-          }}
+          initial={{ opacity: 0 }}
+          animate={loaderDone ? { opacity: 1 } : {}}
+          transition={{ delay: 0.05, duration: 0.4 }}
+          style={{ fontFamily: 'var(--font-dm-mono)', fontSize: 11, color: '#D4F044', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 32 }}
         >
           Digital Product Studio
         </motion.p>
 
-        {/* Headline */}
-        <h1
-          className="leading-none mb-6"
-          style={{
-            fontFamily: 'var(--font-syne)',
-            fontWeight: 800,
-            fontSize: 'clamp(2.5rem, 7vw, 5rem)',
-            letterSpacing: '-0.02em',
-          }}
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={loaderDone ? { opacity: 1, y: 0 } : {}}
+          transition={{ delay: 0.1, duration: 0.5 }}
+          style={{ fontFamily: 'var(--font-syne)', fontWeight: 800, fontSize: 'clamp(2.5rem, 7vw, 5rem)', letterSpacing: '-0.02em', lineHeight: 1.05, color: '#F0EDE6' }}
         >
-          {/* Line 1 */}
-          <span className="block">
-            {headline.slice(0, 3).map((word, i) => (
-              <motion.span
-                key={i}
-                custom={i}
-                initial="hidden"
-                animate="visible"
-                variants={wordVariants}
-                className="inline-block mr-[0.25em]"
-                style={{ color: '#F0EDE6' }}
-              >
-                {word}
-              </motion.span>
-            ))}
-          </span>
-          {/* Line 2 */}
-          <span className="block">
-            {headline.slice(3, 5).map((word, i) => (
-              <motion.span
-                key={i + 3}
-                custom={i + 3}
-                initial="hidden"
-                animate="visible"
-                variants={wordVariants}
-                className="inline-block mr-[0.25em]"
-                style={{ color: '#F0EDE6' }}
-              >
-                {word}
-              </motion.span>
-            ))}
-            {/* "think." in accent color */}
-            <motion.span
-              custom={5}
-              initial="hidden"
-              animate="visible"
-              variants={wordVariants}
-              className="inline-block"
-              style={{ color: '#D4F044' }}
-            >
-              think.
-            </motion.span>
-          </span>
-        </h1>
+          We build digital<br />
+          products that{' '}
+          <span style={{ color: '#D4F044' }}>think.</span>
+        </motion.h1>
 
-        {/* Sub-headline */}
         <motion.p
-          initial="hidden"
-          animate="visible"
-          variants={fadeUp(0.75)}
-          className="max-w-[560px] mx-auto mt-6 text-lg leading-relaxed"
-          style={{
-            fontFamily: 'var(--font-dm-sans)',
-            color: '#888480',
-          }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={loaderDone ? { opacity: 1, y: 0 } : {}}
+          transition={{ delay: 0.2, duration: 0.5 }}
+          style={{ fontFamily: 'var(--font-dm-sans)', color: '#888480', fontSize: 18, lineHeight: 1.7, maxWidth: 560, margin: '24px auto 0' }}
         >
           Premium websites, AI dashboards, and automation pipelines for businesses that want to stand out and operate smarter.
         </motion.p>
 
-        {/* CTAs */}
         <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={fadeUp(1.0)}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10"
+          initial={{ opacity: 0, y: 10 }}
+          animate={loaderDone ? { opacity: 1, y: 0 } : {}}
+          transition={{ delay: 0.3, duration: 0.5 }}
+          style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: 16, marginTop: 40 }}
         >
           <a
             href="#work"
-            onClick={(e) => {
-              e.preventDefault()
-              document.querySelector('#work')?.scrollIntoView({ behavior: 'smooth' })
-            }}
-            className="px-7 py-3.5 text-sm font-medium rounded-sm transition-all duration-200 hover:opacity-90 hover:scale-[1.02]"
-            style={{
-              fontFamily: 'var(--font-dm-sans)',
-              backgroundColor: '#D4F044',
-              color: '#080808',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-            }}
+            onClick={e => { e.preventDefault(); document.querySelector('#work')?.scrollIntoView({ behavior: 'smooth' }) }}
+            style={{ fontFamily: 'var(--font-dm-sans)', backgroundColor: '#D4F044', color: '#080808', padding: '14px 28px', fontSize: 14, fontWeight: 500, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 8, transition: 'opacity 0.2s' }}
+            onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
+            onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
           >
             See Our Work →
           </a>
           <a
             href="#contact"
-            onClick={(e) => {
-              e.preventDefault()
-              document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' })
-            }}
-            className="px-7 py-3.5 text-sm font-medium rounded-sm transition-all duration-200"
-            style={{
-              fontFamily: 'var(--font-dm-sans)',
-              backgroundColor: 'transparent',
-              color: '#F0EDE6',
-              border: '1px solid #444',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = '#D4F044'
-              e.currentTarget.style.color = '#D4F044'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = '#444'
-              e.currentTarget.style.color = '#F0EDE6'
-            }}
+            onClick={e => { e.preventDefault(); document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' }) }}
+            style={{ fontFamily: 'var(--font-dm-sans)', backgroundColor: 'transparent', color: '#F0EDE6', border: '1px solid #444', padding: '14px 28px', fontSize: 14, fontWeight: 500, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 8, transition: 'border-color 0.2s, color 0.2s' }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = '#D4F044'; e.currentTarget.style.color = '#D4F044' }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = '#444'; e.currentTarget.style.color = '#F0EDE6' }}
           >
             Get In Touch
           </a>
         </motion.div>
-      </div>
+      </motion.div>
+
+      {/* Floating UI fragment — desktop only */}
+      <motion.div
+        className="absolute bottom-24 right-8 hidden lg:block"
+        style={{ width: 220 }}
+        animate={loaderDone ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+        transition={{ delay: 0.5, duration: 0.5 }}
+        initial={{ opacity: 0, y: 20 }}
+      >
+        <motion.div animate={{ y: [0, -6, 0] }} transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}>
+          <HUDCorners>
+            <div style={{ background: '#111111', border: '1px solid rgba(212,240,68,0.2)', padding: 16, backdropFilter: 'blur(8px)', fontFamily: 'var(--font-dm-mono)', fontSize: 10 }}>
+              <div style={{ color: '#888480', marginBottom: 8 }}>▸ PORTFOLIO ANALYSIS</div>
+              <div style={{ color: '#D4F044', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                GPT-4o
+                <span className="shimmer-bar" style={{ display: 'inline-block', width: 50, height: 7, verticalAlign: 'middle', borderRadius: 2 }} />
+                82%
+              </div>
+              <div style={{ marginBottom: 8 }}>
+                <span style={{ color: '#D4F044' }}>AI SCORE</span>
+                <span style={{ color: '#F0EDE6' }}>: 9.4 / 10</span>
+              </div>
+              <div style={{ color: '#333' }}>SYS: ONLINE · 43ms</div>
+            </div>
+          </HUDCorners>
+        </motion.div>
+      </motion.div>
 
       {/* Scroll indicator */}
       <motion.div
-        ref={indicatorRef}
         animate={{ opacity: scrolled ? 0 : 1 }}
         transition={{ duration: 0.4 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+        className="absolute bottom-8 left-1/2 -translate-x-1/2"
         style={{ pointerEvents: 'none' }}
       >
-        <span
-          className="text-[11px] tracking-[0.2em] uppercase"
-          style={{ fontFamily: 'var(--font-dm-mono)', color: '#888480' }}
+        <motion.span
+          animate={{ opacity: [0.4, 1, 0.4] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ fontFamily: 'var(--font-dm-mono)', fontSize: 11, color: '#888480', letterSpacing: '0.2em', display: 'block' }}
         >
-          scroll
-        </span>
-        <div
-          className="w-px h-8 overflow-hidden"
-          style={{ backgroundColor: 'rgba(136,132,128,0.3)' }}
-        >
-          <motion.div
-            className="w-full h-full"
-            style={{ backgroundColor: '#888480' }}
-            animate={{ y: ['-100%', '100%'] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
-          />
-        </div>
+          SCROLL ↓
+        </motion.span>
       </motion.div>
     </section>
   )

@@ -1,76 +1,65 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { NAV_LINKS } from '@/lib/constants'
 
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger)
-}
-
 export default function Navbar() {
-  const navRef = useRef<HTMLElement>(null)
-  const [scrolled, setScrolled] = useState(false)
-  const [mobileOpen, setMobileOpen] = useState(false)
+  const navRef        = useRef<HTMLElement>(null)
+  const [scrolled,    setScrolled]    = useState(false)
+  const [mobileOpen,  setMobileOpen]  = useState(false)
   const [activeSection, setActiveSection] = useState('')
+  const [logoVisible, setLogoVisible] = useState(false)
 
+  // Show logo when loader completes
   useEffect(() => {
-    const handleScroll = () => {
-      const currentY = window.scrollY
-      setScrolled(currentY > 80)
-    }
+    if (document.body.classList.contains('loader-complete')) { setLogoVisible(true); return }
+    const fb = setTimeout(() => setLogoVisible(true), 4000)
+    const mo = new MutationObserver(() => {
+      if (document.body.classList.contains('loader-complete')) { setLogoVisible(true); mo.disconnect() }
+    })
+    mo.observe(document.body, { attributes: true, attributeFilter: ['class'] })
+    return () => { mo.disconnect(); clearTimeout(fb) }
+  }, [])
 
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
+  // Scroll state
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 80)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
   // GSAP hide/show on scroll direction
   useEffect(() => {
     if (!navRef.current) return
-
     let lastY = 0
-    const handleScroll = () => {
-      const currentY = window.scrollY
-      if (currentY < 80) {
-        gsap.to(navRef.current, { y: 0, duration: 0.3, ease: 'power2.out' })
-      } else if (currentY > lastY) {
-        gsap.to(navRef.current, { y: '-100%', duration: 0.3, ease: 'power2.out' })
-      } else {
-        gsap.to(navRef.current, { y: 0, duration: 0.3, ease: 'power2.out' })
-      }
-      lastY = currentY
+    const onScroll = () => {
+      const y = window.scrollY
+      if (y < 80) gsap.to(navRef.current, { y: 0, duration: 0.3, ease: 'power2.out' })
+      else if (y > lastY) gsap.to(navRef.current, { y: '-100%', duration: 0.3, ease: 'power2.out' })
+      else gsap.to(navRef.current, { y: 0, duration: 0.3, ease: 'power2.out' })
+      lastY = y
     }
-
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Active section highlighting via IntersectionObserver
+  // Active section via IntersectionObserver
   useEffect(() => {
     const sections = document.querySelectorAll('section[id]')
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id)
-          }
-        })
-      },
+    const io = new IntersectionObserver(
+      entries => entries.forEach(e => { if (e.isIntersecting) setActiveSection(e.target.id) }),
       { rootMargin: '-50% 0px -50% 0px' }
     )
-    sections.forEach((section) => observer.observe(section))
-    return () => observer.disconnect()
+    sections.forEach(s => io.observe(s))
+    return () => io.disconnect()
   }, [])
 
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+  const go = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault()
     setMobileOpen(false)
-    const target = document.querySelector(href)
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth' })
-    }
+    document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' })
   }
 
   return (
@@ -83,106 +72,82 @@ export default function Navbar() {
         className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
         style={{
           backgroundColor: scrolled ? 'rgba(8,8,8,0.85)' : 'transparent',
-          backdropFilter: scrolled ? 'blur(12px)' : 'none',
-          borderBottom: scrolled ? '1px solid #222222' : '1px solid transparent',
+          backdropFilter:  scrolled ? 'blur(12px)' : 'none',
+          borderBottom:    scrolled ? '1px solid #222' : '1px solid transparent',
         }}
       >
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           {/* Logo */}
-          <a href="#" className="flex items-center">
-            <span
-              className="text-xl tracking-tight"
-              style={{ fontFamily: 'var(--font-syne)', fontWeight: 700 }}
-            >
+          <a href="#" style={{ opacity: logoVisible ? 1 : 0, transition: 'opacity 0.15s ease', display: 'flex', alignItems: 'center' }}>
+            <span style={{ fontFamily: 'var(--font-syne)', fontWeight: 700, fontSize: 20, letterSpacing: '-0.01em' }}>
               <span style={{ color: '#F0EDE6' }}>RELENTLESS </span>
               <span style={{ color: '#D4F044' }}>AIS</span>
             </span>
           </a>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-8">
-            {NAV_LINKS.map((link) => {
-              const sectionId = link.href.replace('#', '')
-              const isActive = activeSection === sectionId
-              return (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  onClick={(e) => handleNavClick(e, link.href)}
-                  className="relative text-sm group"
-                  style={{
-                    fontFamily: 'var(--font-dm-sans)',
-                    color: isActive ? '#D4F044' : '#888480',
-                    textDecoration: 'none',
-                    transition: 'color 0.2s',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#F0EDE6')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = isActive ? '#D4F044' : '#888480')}
-                >
-                  {link.label}
-                  <span
-                    className="absolute bottom-0 left-0 h-px transition-all duration-300"
-                    style={{
-                      backgroundColor: '#D4F044',
-                      width: isActive ? '100%' : '0',
-                    }}
-                  />
-                </a>
-              )
-            })}
-            <a
-              href="#contact"
-              onClick={(e) => handleNavClick(e, '#contact')}
-              className="px-5 py-2 text-sm font-medium rounded-sm transition-all duration-200 hover:opacity-90"
-              style={{
-                fontFamily: 'var(--font-dm-sans)',
-                backgroundColor: '#D4F044',
-                color: '#080808',
-              }}
-            >
-              Get in Touch →
-            </a>
-          </div>
+          <LayoutGroup>
+            <div className="hidden md:flex items-center gap-8">
+              {NAV_LINKS.map(link => {
+                const id = link.href.replace('#', '')
+                const active = activeSection === id
+                return (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    onClick={e => go(e, link.href)}
+                    className="relative text-sm"
+                    style={{ fontFamily: 'var(--font-dm-sans)', color: active ? '#D4F044' : '#888480', textDecoration: 'none', transition: 'color 0.2s' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = '#F0EDE6')}
+                    onMouseLeave={e => (e.currentTarget.style.color = active ? '#D4F044' : '#888480')}
+                  >
+                    {link.label}
+                    {active && (
+                      <motion.span
+                        layoutId="nav-indicator"
+                        style={{ position: 'absolute', bottom: -2, left: 0, right: 0, height: 2, backgroundColor: '#D4F044' }}
+                      />
+                    )}
+                  </a>
+                )
+              })}
 
-          {/* Mobile Hamburger */}
-          <button
-            className="md:hidden flex flex-col gap-1.5 p-2"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Toggle menu"
-          >
-            <span
-              className="block w-6 h-0.5 transition-all duration-300"
-              style={{
+              {/* Terminal cursor */}
+              <span className="terminal-cursor" />
+
+              <a
+                href="#contact"
+                onClick={e => go(e, '#contact')}
+                style={{ fontFamily: 'var(--font-dm-sans)', backgroundColor: '#D4F044', color: '#080808', padding: '8px 20px', fontSize: 14, fontWeight: 500, textDecoration: 'none', transition: 'opacity 0.2s' }}
+                onMouseEnter={e => (e.currentTarget.style.opacity = '0.85')}
+                onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+              >
+                Get in Touch →
+              </a>
+            </div>
+          </LayoutGroup>
+
+          {/* Hamburger */}
+          <button className="md:hidden flex flex-col gap-1.5 p-2" onClick={() => setMobileOpen(v => !v)} aria-label="Toggle menu">
+            {[0, 1, 2].map(i => (
+              <span key={i} className="block w-6 h-0.5 transition-all duration-300" style={{
                 backgroundColor: '#F0EDE6',
-                transform: mobileOpen ? 'rotate(45deg) translateY(8px)' : 'none',
-              }}
-            />
-            <span
-              className="block w-6 h-0.5 transition-all duration-300"
-              style={{
-                backgroundColor: '#F0EDE6',
-                opacity: mobileOpen ? 0 : 1,
-              }}
-            />
-            <span
-              className="block w-6 h-0.5 transition-all duration-300"
-              style={{
-                backgroundColor: '#F0EDE6',
-                transform: mobileOpen ? 'rotate(-45deg) translateY(-8px)' : 'none',
-              }}
-            />
+                transform: i === 0 && mobileOpen ? 'rotate(45deg) translateY(8px)' : i === 2 && mobileOpen ? 'rotate(-45deg) translateY(-8px)' : 'none',
+                opacity: i === 1 && mobileOpen ? 0 : 1,
+              }} />
+            ))}
           </button>
         </div>
       </motion.nav>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile overlay — scan sweep entrance */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ clipPath: 'inset(0 0 100% 0)' }}
+            animate={{ clipPath: 'inset(0 0 0% 0)' }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.3, ease: 'linear' }}
             className="fixed inset-0 z-40 flex flex-col items-center justify-center"
             style={{ backgroundColor: '#080808' }}
           >
@@ -191,32 +156,22 @@ export default function Navbar() {
                 <motion.a
                   key={link.href}
                   href={link.href}
-                  onClick={(e) => handleNavClick(e, link.href)}
+                  onClick={e => go(e, link.href)}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.08, duration: 0.4 }}
-                  className="text-5xl font-bold"
-                  style={{
-                    fontFamily: 'var(--font-syne)',
-                    color: '#F0EDE6',
-                    textDecoration: 'none',
-                  }}
+                  transition={{ delay: 0.15 + i * 0.08, duration: 0.4 }}
+                  style={{ fontFamily: 'var(--font-syne)', fontWeight: 700, fontSize: 48, color: '#F0EDE6', textDecoration: 'none' }}
                 >
                   {link.label}
                 </motion.a>
               ))}
               <motion.a
                 href="#contact"
-                onClick={(e) => handleNavClick(e, '#contact')}
+                onClick={e => go(e, '#contact')}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: NAV_LINKS.length * 0.08, duration: 0.4 }}
-                className="mt-4 px-8 py-4 text-lg font-medium rounded-sm"
-                style={{
-                  fontFamily: 'var(--font-syne)',
-                  backgroundColor: '#D4F044',
-                  color: '#080808',
-                }}
+                transition={{ delay: 0.15 + NAV_LINKS.length * 0.08, duration: 0.4 }}
+                style={{ marginTop: 16, fontFamily: 'var(--font-syne)', backgroundColor: '#D4F044', color: '#080808', padding: '16px 32px', fontSize: 18, fontWeight: 500, textDecoration: 'none' }}
               >
                 Get in Touch →
               </motion.a>
