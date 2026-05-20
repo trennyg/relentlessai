@@ -8,6 +8,7 @@ interface HUDCornersProps {
   active?: boolean
   className?: string
   color?: string
+  size?: number
 }
 
 const cornerVariants: Variants = {
@@ -24,7 +25,7 @@ const cornerVariants: Variants = {
   },
 }
 
-export function HUDCorners({ children, active = true, className = '', color = 'rgba(212,240,68,0.35)' }: HUDCornersProps) {
+export function HUDCorners({ children, active = true, className = '', color = 'rgba(212,240,68,0.35)', size = 12 }: HUDCornersProps) {
   const corners = [
     { id: 'top-left',     style: { top: 0, left: 0 },     h: { top: 0, left: 0 },     v: { top: 0, left: 0 } },
     { id: 'top-right',    style: { top: 0, right: 0 },    h: { top: 0, right: 0 },    v: { top: 0, right: 0 } },
@@ -48,7 +49,7 @@ export function HUDCorners({ children, active = true, className = '', color = 'r
           <div style={{
             position: 'absolute',
             ...corner.h,
-            width: 12,
+            width: size,
             height: 1,
             backgroundColor: color,
           }} />
@@ -57,7 +58,7 @@ export function HUDCorners({ children, active = true, className = '', color = 'r
             position: 'absolute',
             ...corner.v,
             width: 1,
-            height: 12,
+            height: size,
             backgroundColor: color,
           }} />
         </motion.div>

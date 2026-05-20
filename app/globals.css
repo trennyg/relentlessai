@@ -223,3 +223,25 @@ body::after {
   stroke-dasharray: 6 6;
   animation: dashFlow 0.8s linear infinite;
 }
+
+/* Circuit trace pulse */
+@keyframes pulseTrace {
+  0%, 100% { opacity: 0.15; }
+  50%       { opacity: 0.6; }
+}
+
+/* Blink */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* Circuit scan sweep (inside image) */
+@keyframes scanBar {
+  0%   { top: -2px; }
+  100% { top: calc(100% + 2px); }
+}
+
+.circuit-pulse { animation: pulseTrace 3s ease-in-out infinite; }
+.blink-anim    { animation: blink 1s step-end infinite; }
+.scan-bar      { animation: scanBar 1.8s ease-in-out infinite alternate; }

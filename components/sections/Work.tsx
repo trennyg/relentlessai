@@ -24,21 +24,33 @@ function DossierCard({ project, index }: { project: typeof PROJECTS[0]; index: n
         bottomRight={project.stack[1] ?? ''}
       />
       <div style={{ width: '70vw', maxWidth: 700, backgroundColor: '#111', border: '1px solid #222', overflow: 'hidden', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
-        {/* Image */}
+        {/* Image — grayscale → color on viewport entry */}
         <div style={{ position: 'relative', aspectRatio: '16/9', overflow: 'hidden', backgroundColor: '#0A0A0A', flexShrink: 0 }}>
-          {isProduction && (
-            <div style={{ position: 'absolute', top: 10, left: 10, zIndex: 2, fontFamily: 'var(--font-dm-mono)', fontSize: 10, fontWeight: 700, backgroundColor: '#D4F044', color: '#080808', padding: '3px 8px' }}>
-              ● OPERATION ACTIVE
-            </div>
-          )}
-          {isLive && !isProduction && (
-            <div style={{ position: 'absolute', top: 10, left: 10, zIndex: 2, fontFamily: 'var(--font-dm-mono)', fontSize: 10, color: '#4CAF50' }}>
-              ● LIVE
-            </div>
-          )}
-          <Image src={project.image} alt={project.title} fill className="object-cover" sizes="70vw"
-            style={{ filter: 'grayscale(15%)' }}
-            onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
+          {/* Status badge top-right */}
+          <div style={{ position: 'absolute', top: 10, right: 10, zIndex: 2, fontFamily: 'var(--font-dm-mono)', fontSize: 9, animation: 'pulseDot 1.5s ease-in-out infinite' }}>
+            {isProduction
+              ? <span style={{ color: '#D4F044' }}>● IN PRODUCTION</span>
+              : <span style={{ color: '#4CAF50' }}>● LIVE</span>
+            }
+          </div>
+          <motion.div
+            initial={{ filter: 'grayscale(100%)' }}
+            whileInView={{ filter: 'grayscale(0%)' }}
+            viewport={{ once: true, amount: 0.4 }}
+            transition={{ duration: 0.8, ease: 'easeOut' }}
+            style={{ position: 'relative', width: '100%', height: '100%' }}
+          >
+            <Image src={project.image} alt={project.title} fill className="object-cover" sizes="70vw"
+              onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
+            />
+          </motion.div>
+          {/* Scan sweep on image entry */}
+          <motion.div
+            initial={{ top: -1, opacity: 1 }}
+            whileInView={{ top: '105%', opacity: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.6, ease: 'linear' }}
+            style={{ position: 'absolute', left: 0, width: '100%', height: 1, background: '#D4F044', boxShadow: '0 0 8px #D4F044', zIndex: 3, pointerEvents: 'none' }}
           />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 55%, rgba(8,8,8,0.85) 100%)' }} />
         </div>

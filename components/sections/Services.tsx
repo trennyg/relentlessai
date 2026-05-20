@@ -2,137 +2,213 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import Image from 'next/image'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SERVICES } from '@/lib/constants'
 import HUDCorners from '@/components/ui/HUDCorners'
+import CircuitBackground from '@/components/ui/CircuitBackground'
 
 if (typeof window !== 'undefined') gsap.registerPlugin(ScrollTrigger)
 
 const MODULE_NAMES = ['BRAND.WEBSITES', 'AI.DASHBOARDS', 'AUTOMATION.PIPES']
 
-// ── Mockups ──────────────────────────────────────────────────
-
-function BrandMockup() {
+// ── Browser frame wrapper ──────────────────────────────────
+function BrowserFrame({
+  src, alt, url, style, className = '',
+}: {
+  src: string; alt: string; url: string; style?: React.CSSProperties; className?: string
+}) {
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%', padding: 32 }}>
-      <span style={{ position: 'absolute', top: 14, right: 18, fontFamily: 'var(--font-dm-mono)', fontSize: 10, color: '#555' }}>LAYOUT.DRAFT</span>
-      <svg width="100%" height="100%" viewBox="0 0 400 280" preserveAspectRatio="xMidYMid meet">
-        <defs>
-          <pattern id="g1" width="20" height="20" patternUnits="userSpaceOnUse">
-            <path d="M20 0L0 0 0 20" fill="none" stroke="rgba(212,240,68,0.05)" strokeWidth="0.5" />
-          </pattern>
-        </defs>
-        <rect width="400" height="280" fill="url(#g1)" />
-        {/* Nav */}
-        <rect x="8" y="8"   width="384" height="26" rx="1" fill="none" stroke="#2A2A2A" strokeWidth="1" />
-        <rect x="16" y="15" width="36"  height="10" rx="1" fill="#D4F044" opacity="0.7" />
-        <rect x="310" y="15" width="24" height="10" rx="1" fill="none" stroke="#333" strokeWidth="1" />
-        <rect x="342" y="15" width="24" height="10" rx="1" fill="none" stroke="#333" strokeWidth="1" />
-        <rect x="374" y="15" width="14" height="10" rx="1" fill="none" stroke="#D4F044" strokeWidth="1" />
-        {/* Hero */}
-        <rect x="8" y="42" width="384" height="100" rx="1" fill="none" stroke="#2A2A2A" strokeWidth="1" />
-        <text x="200" y="95" textAnchor="middle" fill="#2A2A2A" fontFamily="monospace" fontSize="10">HERO</text>
-        <rect x="148" y="105" width="52" height="14" rx="1" fill="#D4F044" opacity="0.65" />
-        <rect x="208" y="105" width="52" height="14" rx="1" fill="none" stroke="#333" strokeWidth="1" />
-        {/* Cols */}
-        <rect x="8"   y="150" width="184" height="64" rx="1" fill="none" stroke="#2A2A2A" strokeWidth="1" />
-        <rect x="200" y="150" width="192" height="64" rx="1" fill="none" stroke="#2A2A2A" strokeWidth="1" />
-        {[162,172,182,192].map(y => <rect key={y} x="18"  y={y} width={60 + (y % 3) * 20} height="3" rx="1" fill="#1E1E1E" />)}
-        {[162,172,182,192].map(y => <rect key={`r${y}`} x="210" y={y} width={50 + (y % 4) * 18} height="3" rx="1" fill="#1E1E1E" />)}
-        {/* Footer */}
-        <rect x="8" y="222" width="384" height="22" rx="1" fill="none" stroke="#1E1E1E" strokeWidth="1" />
-      </svg>
+    <HUDCorners size={6}>
+      <div style={{ overflow: 'hidden', border: '1px solid #2a2a2a', ...style }} className={className}>
+        {/* Chrome bar */}
+        <div style={{ height: 30, background: '#151515', borderBottom: '1px solid #2a2a2a', display: 'flex', alignItems: 'center', padding: '0 10px', gap: 6 }}>
+          <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#ff5f57', display: 'inline-block' }} />
+          <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#febc2e', display: 'inline-block' }} />
+          <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#28c840', display: 'inline-block' }} />
+          <div style={{ flex: 1, height: 16, background: '#0d0d0d', borderRadius: 3, margin: '0 8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontFamily: 'var(--font-dm-mono)', fontSize: 9, color: '#444' }}>{url}</span>
+          </div>
+        </div>
+        {/* Screenshot */}
+        <div style={{ position: 'relative', aspectRatio: '16/10', overflow: 'hidden' }}>
+          <Image src={src} alt={alt} fill className="object-cover object-top" sizes="60vw" />
+        </div>
+      </div>
+    </HUDCorners>
+  )
+}
+
+// ── Panel 1 — Brand Websites ───────────────────────────────
+function BrandPanel({ active }: { active: boolean }) {
+  return (
+    <div style={{ position: 'relative', width: '100%', height: '100%', padding: 32, display: 'flex', flexDirection: 'column', justifyContent: 'center', overflow: 'hidden' }}>
+      <span style={{ position: 'absolute', top: 14, right: 18, fontFamily: 'var(--font-dm-mono)', fontSize: 10, color: '#444' }}>LAYOUT.DRAFT</span>
+
+      {/* Frame 1 — Ron Ashton (larger, behind) */}
+      <motion.div
+        initial={{ x: 60, opacity: 0 }}
+        animate={active ? { x: 0, opacity: 1 } : { x: 60, opacity: 0 }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
+        style={{ width: '88%', zIndex: 1, position: 'relative' }}
+      >
+        <BrowserFrame
+          src="/images/ron-pereira.png"
+          alt="Ron Ashton Music"
+          url="ron-pereira.vercel.app"
+        />
+      </motion.div>
+
+      {/* Frame 2 — JAAN (smaller, overlapping) */}
+      <motion.div
+        initial={{ x: 80, opacity: 0 }}
+        animate={active ? { x: 0, opacity: 1 } : { x: 80, opacity: 0 }}
+        transition={{ duration: 0.5, delay: 0.15, ease: 'easeOut' }}
+        style={{ width: '55%', position: 'absolute', bottom: 32, right: 24, zIndex: 2, transform: 'rotate(-2deg)' }}
+      >
+        <BrowserFrame
+          src="/images/jaan-hero.png"
+          alt="JAAN Perfumes"
+          url="jaan-pied.vercel.app"
+        />
+      </motion.div>
     </div>
   )
 }
 
-function DashMockup() {
-  const [vals, setVals] = useState({ aum: 142.3, pnl: 8.7 })
-  useEffect(() => {
-    const t = setInterval(() => setVals({ aum: 138 + Math.random() * 10, pnl: 6.5 + Math.random() * 4 }), 2000)
-    return () => clearInterval(t)
-  }, [])
-
-  const pts = [[0,75],[40,48],[80,60],[120,28],[160,42],[200,18],[240,38],[280,12],[320,32],[360,8]]
-  const path = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p[0]},${p[1]}`).join(' ')
-  const area = `${path} L360,90 L0,90 Z`
+// ── Panel 2 — AI Dashboards ────────────────────────────────
+function DashPanel({ active }: { active: boolean }) {
+  const annotations = [
+    { text: '← LIVE AUM TRACKING',          top: '18%', left: '4%',  delay: 0.0 },
+    { text: '← GPT-4o PORTFOLIO ANALYSIS',  top: '42%', left: '4%',  delay: 0.3 },
+    { text: '← REAL-TIME TRADE MONITORING', top: '70%', left: '4%',  delay: 0.6 },
+  ]
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%', padding: 28 }}>
-      <span style={{ position: 'absolute', top: 14, right: 18, fontFamily: 'var(--font-dm-mono)', fontSize: 10, color: '#555' }}>PORTFOLIO.INTEL</span>
-      <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <div style={{ flex: 1, border: '1px solid #1E1E1E', padding: 12 }}>
-          <div style={{ fontFamily: 'var(--font-dm-mono)', fontSize: 9, color: '#555', marginBottom: 8 }}>P&L PERFORMANCE</div>
-          <svg width="100%" height="80" viewBox="0 0 360 90" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="rgba(212,240,68,0.25)" />
-                <stop offset="100%" stopColor="rgba(212,240,68,0)" />
-              </linearGradient>
-            </defs>
-            <path d={area} fill="url(#cg)" />
-            <path d={path} fill="none" stroke="#D4F044" strokeWidth="1.5" />
-            {pts.map((p, i) => <circle key={i} cx={p[0]} cy={p[1]} r="2" fill="#D4F044" />)}
-          </svg>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-          <div style={{ border: '1px solid #1E1E1E', padding: '10px 12px' }}>
-            <div style={{ fontFamily: 'var(--font-dm-mono)', fontSize: 9, color: '#555' }}>AUM</div>
-            <div style={{ fontFamily: 'var(--font-syne)', fontSize: 20, color: '#F0EDE6', fontWeight: 700 }}>${vals.aum.toFixed(1)}M</div>
+    <div style={{ position: 'relative', width: '100%', height: '100%', padding: 32, display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
+      <span style={{ position: 'absolute', top: 14, right: 18, fontFamily: 'var(--font-dm-mono)', fontSize: 10, color: '#444' }}>PORTFOLIO.INTEL</span>
+
+      <motion.div
+        initial={{ x: 40, opacity: 0 }}
+        animate={active ? { x: 0, opacity: 1 } : { x: 40, opacity: 0 }}
+        transition={{ duration: 0.5 }}
+        style={{ width: '75%', position: 'relative', zIndex: 1 }}
+      >
+        <BrowserFrame
+          src="/images/ares-dashboard.png"
+          alt="Portfolio Intelligence Dashboard"
+          url="portfolio.intelligence.dashboard"
+        />
+      </motion.div>
+
+      {/* Annotation pills */}
+      {annotations.map((ann, i) => (
+        <motion.div
+          key={i}
+          initial={{ opacity: 0, x: -10 }}
+          animate={active ? { opacity: 1, x: 0 } : { opacity: 0, x: -10 }}
+          transition={{ delay: 0.4 + ann.delay, duration: 0.3 }}
+          style={{ position: 'absolute', top: ann.top, left: ann.left, zIndex: 3 }}
+        >
+          <div style={{
+            background: 'rgba(0,0,0,0.85)',
+            border: '1px solid #D4F044',
+            padding: '4px 10px',
+            fontFamily: 'var(--font-dm-mono)',
+            fontSize: 9,
+            color: '#D4F044',
+            whiteSpace: 'nowrap',
+          }}>
+            {ann.text}
           </div>
-          <div style={{ border: '1px solid #1E1E1E', padding: '10px 12px' }}>
-            <div style={{ fontFamily: 'var(--font-dm-mono)', fontSize: 9, color: '#555' }}>P&L</div>
-            <div style={{ fontFamily: 'var(--font-syne)', fontSize: 20, color: '#D4F044', fontWeight: 700 }}>+{vals.pnl.toFixed(1)}%</div>
+        </motion.div>
+      ))}
+    </div>
+  )
+}
+
+// ── Panel 3 — Automation Pipeline ─────────────────────────
+function PipelinePanel({ active }: { active: boolean }) {
+  const [scanPos, setScanPos] = useState(0)
+
+  useEffect(() => {
+    if (!active) return
+    const id = setInterval(() => setScanPos(p => (p + 1) % 5), 800)
+    return () => clearInterval(id)
+  }, [active])
+
+  const nodes = [
+    { label: 'DOCUMENTS',     sub: ['PAN Card', 'Bank Stmt', 'ITR Filing'], icon: '📄' },
+    { label: 'OCR ENGINE',    sub: ['EXTRACTING...'],                         icon: '⌖' },
+    { label: 'DATA EXTRACT',  sub: ['NAME ████', 'DOB  ████', 'PAN  ████'],  icon: '≡' },
+    { label: 'RISK SCORING',  sub: ['SCORE: LOW RISK'],                       icon: '◎' },
+    { label: 'REPORT',        sub: ['✓ VERIFIED', 'Gen: 4.2s'],               icon: '✓' },
+  ]
+
+  return (
+    <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+      <span style={{ position: 'absolute', top: 14, right: 18, fontFamily: 'var(--font-dm-mono)', fontSize: 10, color: '#444' }}>PIPELINE.ACTIVE</span>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 0, width: '100%', justifyContent: 'center' }}>
+        {nodes.map((node, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center' }}>
+            {/* Node */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={active ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ delay: i * 0.18, duration: 0.4 }}
+            >
+              <HUDCorners size={5}>
+                <div style={{
+                  width: 80,
+                  minHeight: 90,
+                  background: '#0e0e0e',
+                  border: `1px solid ${scanPos === i ? '#D4F044' : '#222'}`,
+                  padding: '10px 8px',
+                  textAlign: 'center',
+                  transition: 'border-color 0.3s',
+                }}>
+                  <div style={{ fontSize: 18, marginBottom: 4 }}>{node.icon}</div>
+                  <div style={{ fontFamily: 'var(--font-dm-mono)', fontSize: 8, color: '#D4F044', marginBottom: 6, letterSpacing: '0.05em' }}>{node.label}</div>
+                  {node.sub.map(s => (
+                    <div key={s} style={{ fontFamily: 'var(--font-dm-mono)', fontSize: 7, color: '#888480', lineHeight: 1.6 }}>{s}</div>
+                  ))}
+                  {/* Status dot */}
+                  <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#D4F044', margin: '6px auto 0', animation: 'pulseDot 1.2s ease-in-out infinite', animationDelay: `${i * 0.2}s` }} />
+                </div>
+              </HUDCorners>
+            </motion.div>
+
+            {/* Arrow */}
+            {i < nodes.length - 1 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={active ? { opacity: 1 } : { opacity: 0 }}
+                transition={{ delay: i * 0.18 + 0.3, duration: 0.3 }}
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, width: 32 }}
+              >
+                <div style={{ fontFamily: 'var(--font-dm-mono)', fontSize: 7, color: '#444' }}>
+                  {['UPLOAD','PROCESS','VERIFY','GENERATE'][i]}
+                </div>
+                <svg width="32" height="10" viewBox="0 0 32 10">
+                  <line x1="0" y1="5" x2="26" y2="5" stroke="#D4F044" strokeWidth="1" strokeDasharray="4 3">
+                    <animate attributeName="stroke-dashoffset" values="14;0" dur="0.7s" repeatCount="indefinite" />
+                  </line>
+                  <polygon points="24,2 32,5 24,8" fill="#D4F044" />
+                </svg>
+              </motion.div>
+            )}
           </div>
-        </div>
-        <div style={{ border: '1px solid #1E1E1E', padding: '10px 12px' }}>
-          <div style={{ fontFamily: 'var(--font-dm-mono)', fontSize: 9, color: '#555', marginBottom: 6 }}>AI ANALYSIS</div>
-          <div style={{ height: 4, background: '#1A1A1A', borderRadius: 2 }}>
-            <div className="shimmer-bar" style={{ height: '100%', width: '82%', borderRadius: 2 }} />
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   )
 }
 
-function PipelineMockup() {
-  return (
-    <div style={{ position: 'relative', width: '100%', height: '100%', padding: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <span style={{ position: 'absolute', top: 14, right: 18, fontFamily: 'var(--font-dm-mono)', fontSize: 10, color: '#555' }}>PIPELINE.ACTIVE</span>
-      <svg width="100%" height="160" viewBox="0 0 420 160">
-        {[
-          { x: 20,  label: 'DOCUMENT',   sub: 'INPUT' },
-          { x: 160, label: 'OCR.ENGINE', sub: 'PROCESS' },
-          { x: 300, label: 'REPORT',     sub: 'OUTPUT' },
-        ].map((box, i) => (
-          <g key={i}>
-            <rect x={box.x} y={45} width={100} height={56} rx="2" fill="#0E0E0E" stroke="#2A2A2A" strokeWidth="1" />
-            <text x={box.x + 50} y={73}  textAnchor="middle" fill="#F0EDE6" fontFamily="monospace" fontSize="9" fontWeight="bold">{box.label}</text>
-            <text x={box.x + 50} y={87}  textAnchor="middle" fill="#555"    fontFamily="monospace" fontSize="8">{box.sub}</text>
-            <circle cx={box.x + 87} cy={52} r="3.5" fill="#D4F044">
-              <animate attributeName="opacity" values="1;0.2;1" dur="1.4s" begin={`${i * 0.45}s`} repeatCount="indefinite" />
-            </circle>
-          </g>
-        ))}
-        <line x1="120" y1="73" x2="157" y2="73" stroke="#D4F044" strokeWidth="1" strokeDasharray="4 4">
-          <animate attributeName="stroke-dashoffset" values="16;0" dur="0.5s" repeatCount="indefinite" />
-        </line>
-        <polygon points="154,69 162,73 154,77" fill="#D4F044" />
-        <line x1="260" y1="73" x2="297" y2="73" stroke="#D4F044" strokeWidth="1" strokeDasharray="4 4">
-          <animate attributeName="stroke-dashoffset" values="16;0" dur="0.5s" repeatCount="indefinite" />
-        </line>
-        <polygon points="294,69 302,73 294,77" fill="#D4F044" />
-      </svg>
-    </div>
-  )
-}
-
-const MOCKUPS = [BrandMockup, DashMockup, PipelineMockup]
+const PANELS = [BrandPanel, DashPanel, PipelinePanel]
 
 // ── Main ─────────────────────────────────────────────────────
-
 export default function Services() {
   const sectionRef = useRef<HTMLElement>(null)
   const [active,   setActive]   = useState(0)
@@ -145,7 +221,7 @@ export default function Services() {
     const st = ScrollTrigger.create({
       trigger: section,
       start: 'top top',
-      end: '+=200%',
+      end: '+=300%',
       pin: true,
       onUpdate: self => {
         const next = self.progress < 0.33 ? 0 : self.progress < 0.66 ? 1 : 2
@@ -158,7 +234,7 @@ export default function Services() {
     return () => st.kill()
   }, [])
 
-  const Mockup  = MOCKUPS[active]
+  const Panel   = PANELS[active]
   const service = SERVICES[active]
 
   return (
@@ -168,32 +244,30 @@ export default function Services() {
       style={{ height: '100vh', backgroundColor: '#080808', display: 'flex', alignItems: 'stretch', overflow: 'hidden' }}
     >
       {/* LEFT — 40% */}
-      <div style={{ width: '40%', borderRight: '1px solid #222', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 40px' }}>
+      <div style={{ width: '40%', borderRight: '1px solid #222', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 40px', position: 'relative', overflow: 'hidden' }}>
+        <CircuitBackground opacity={0.05} animated={true} />
+
         <HUDCorners>
-          <div style={{ padding: '28px 0' }}>
+          <div style={{ padding: '28px 0', position: 'relative', zIndex: 1 }}>
             <p style={{ fontFamily: 'var(--font-dm-mono)', fontSize: 10, color: '#D4F044', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: 28 }}>
               WHAT WE DO
             </p>
 
-            {/* Module list */}
-            <div style={{ marginBottom: 32 }}>
-              {SERVICES.map((s, i) => {
-                const on = i === active
-                return (
-                  <div key={s.title} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #141414' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span style={{ fontFamily: 'var(--font-dm-mono)', fontSize: 11, color: '#444' }}>{String(i + 1).padStart(2, '0')}</span>
-                      <span style={{ fontFamily: 'var(--font-syne)', fontSize: 16, fontWeight: 700, color: on ? '#F0EDE6' : '#2A2A2A', transition: 'color 0.3s' }}>{MODULE_NAMES[i]}</span>
-                    </div>
-                    <span style={{ fontFamily: 'var(--font-dm-mono)', fontSize: 10, color: on ? '#D4F044' : '#2A2A2A', transition: 'color 0.3s' }}>{on ? '● ACTIVE' : '○ STANDBY'}</span>
+            {SERVICES.map((s, i) => {
+              const on = i === active
+              return (
+                <div key={s.title} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 0', borderBottom: '1px solid #141414' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ fontFamily: 'var(--font-dm-mono)', fontSize: 11, color: '#444' }}>{String(i + 1).padStart(2, '0')}</span>
+                    <span style={{ fontFamily: 'var(--font-syne)', fontSize: 16, fontWeight: 700, color: on ? '#F0EDE6' : '#2A2A2A', transition: 'color 0.3s' }}>{MODULE_NAMES[i]}</span>
                   </div>
-                )
-              })}
-            </div>
+                  <span style={{ fontFamily: 'var(--font-dm-mono)', fontSize: 10, color: on ? '#D4F044' : '#2A2A2A', transition: 'color 0.3s' }}>{on ? '● ACTIVE' : '○ STANDBY'}</span>
+                </div>
+              )
+            })}
 
-            {/* Description */}
             <AnimatePresence mode="wait">
-              <motion.div key={active} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
+              <motion.div key={active} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} style={{ marginTop: 24 }}>
                 <p style={{ fontFamily: 'var(--font-dm-sans)', fontSize: 13, color: '#888480', lineHeight: 1.7, marginBottom: 14 }}>{service.body}</p>
                 <div style={{ borderTop: '1px solid #141414', paddingTop: 14 }}>
                   <span style={{ fontFamily: 'var(--font-dm-mono)', fontSize: 10, color: '#555', letterSpacing: '0.1em' }}>TARGET: </span>
@@ -207,6 +281,7 @@ export default function Services() {
 
       {/* RIGHT — 60% */}
       <div style={{ width: '60%', position: 'relative', overflow: 'hidden', backgroundColor: '#050505' }}>
+        {/* Scan sweep on module change */}
         <AnimatePresence>
           {scanning && (
             <motion.div key="scan" initial={{ top: -1 }} animate={{ top: '100%' }} transition={{ duration: 0.3, ease: 'linear' }}
@@ -214,10 +289,12 @@ export default function Services() {
             />
           )}
         </AnimatePresence>
-        <div className="grid-bg" style={{ position: 'absolute', inset: 0, opacity: 0.4 }} />
+
+        <div className="grid-bg" style={{ position: 'absolute', inset: 0, opacity: 0.3 }} />
+
         <AnimatePresence mode="wait">
           <motion.div key={active} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2, delay: 0.15 }} style={{ position: 'absolute', inset: 0 }}>
-            <Mockup />
+            <Panel active={true} />
           </motion.div>
         </AnimatePresence>
       </div>

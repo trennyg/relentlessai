@@ -1,52 +1,21 @@
 'use client'
 
-import { useRef, useState, useEffect } from 'react'
+import { useRef } from 'react'
 import { motion } from 'framer-motion'
 import { STATS } from '@/lib/constants'
+import { useCountUp } from '@/lib/useCountUp'
 import HUDCorners from '@/components/ui/HUDCorners'
 import DataReadout from '@/components/ui/DataReadout'
 import ScanReveal from '@/components/ui/ScanReveal'
+import CircuitBackground from '@/components/ui/CircuitBackground'
 
 const CHARS = '01█▓░⌗'
-
-function useCountUp(target: number, duration = 1500) {
-  const [count,  setCount]  = useState(0)
-  const [active, setActive] = useState(false)
-  const ref    = useRef<HTMLDivElement>(null)
-  const rafRef = useRef(0)
-
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const io = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setActive(true); io.disconnect() } },
-      { threshold: 0.5 }
-    )
-    io.observe(el)
-    return () => { io.disconnect(); cancelAnimationFrame(rafRef.current) }
-  }, [])
-
-  useEffect(() => {
-    if (!active) return
-    const start = performance.now()
-    const tick = (now: number) => {
-      const p = Math.min((now - start) / duration, 1)
-      const eased = 1 - Math.pow(1 - p, 3)
-      setCount(Math.round(eased * target))
-      if (p < 1) rafRef.current = requestAnimationFrame(tick)
-    }
-    rafRef.current = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(rafRef.current)
-  }, [active, target, duration])
-
-  return { count, ref, active }
-}
 
 function StatBlock({ stat }: { stat: typeof STATS[0] }) {
   const isPct  = stat.number.includes('%')
   const target = parseInt(stat.number.replace('%', ''), 10)
-  const { count, ref, active } = useCountUp(target)
-  const scrambling = active && count < target
+  const { count, ref } = useCountUp(target)
+  const scrambling = count > 0 && count < target
 
   const display = isPct
     ? `${count}%`
@@ -74,7 +43,8 @@ function StatBlock({ stat }: { stat: typeof STATS[0] }) {
 export default function About() {
   return (
     <ScanReveal>
-      <section id="about" className="px-6 py-28 md:py-32" style={{ backgroundColor: '#080808', position: 'relative' }}>
+      <section id="about" className="px-6 py-28 md:py-32" style={{ backgroundColor: '#080808', position: 'relative', overflow: 'hidden' }}>
+        <CircuitBackground opacity={0.04} animated={true} />
         <DataReadout topLeft="WHO.WE.ARE" topRight="EST. 2024" bottomLeft="MUM · IN" bottomRight="RELENTLESSAIS.COM" />
 
         <div className="max-w-7xl mx-auto">

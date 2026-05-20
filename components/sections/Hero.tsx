@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import HUDCorners from '@/components/ui/HUDCorners'
+import CircuitBackground from '@/components/ui/CircuitBackground'
 
 export default function Hero() {
   const [scrolled,   setScrolled]   = useState(false)
@@ -35,6 +36,9 @@ export default function Hero() {
       className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 overflow-hidden grid-bg grid-mask"
       style={{ backgroundColor: '#080808' }}
     >
+      {/* PCB circuit background */}
+      <CircuitBackground opacity={0.04} animated={false} />
+
       {/* Radial glow */}
       <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(212,240,68,0.04) 0%, transparent 70%)' }} />
 
