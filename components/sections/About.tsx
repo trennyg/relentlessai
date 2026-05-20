@@ -98,7 +98,7 @@ export default function About() {
                 lineHeight: 1.2,
               }}
             >
-              We are Relentless AI.<br />A digital product studio.
+              We are Relentless AIS.<br />A digital product studio.
             </h2>
 
             <div className="mt-6 space-y-4">

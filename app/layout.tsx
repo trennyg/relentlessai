@@ -24,19 +24,19 @@ const dmMono = DM_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Relentless AI — Digital Product Studio',
+  title: 'Relentless AIS — Digital Product Studio',
   description: 'We build premium websites, AI dashboards, and automation pipelines for businesses that want to stand out and operate smarter.',
   keywords: ['web development India', 'AI dashboard development', 'fintech dashboard', 'premium website design Mumbai', 'automation pipeline', 'Next.js developer India'],
   openGraph: {
-    title: 'Relentless AI — Digital Product Studio',
+    title: 'Relentless AIS — Digital Product Studio',
     description: 'Premium websites, AI dashboards, and automation pipelines.',
     url: 'https://relentlessais.com',
-    siteName: 'Relentless AI',
+    siteName: 'Relentless AIS',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Relentless AI',
+    title: 'Relentless AIS',
     description: 'We build digital products that think.',
   },
 }

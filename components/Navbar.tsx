@@ -95,7 +95,7 @@ export default function Navbar() {
               style={{ fontFamily: 'var(--font-syne)', fontWeight: 700 }}
             >
               <span style={{ color: '#F0EDE6' }}>RELENTLESS </span>
-              <span style={{ color: '#D4F044' }}>AI</span>
+              <span style={{ color: '#D4F044' }}>AIS</span>
             </span>
           </a>
 

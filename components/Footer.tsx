@@ -37,7 +37,7 @@ export default function Footer() {
             style={{ fontFamily: 'var(--font-syne)', fontWeight: 700 }}
           >
             <span style={{ color: '#F0EDE6' }}>RELENTLESS </span>
-            <span style={{ color: '#D4F044' }}>AI</span>
+            <span style={{ color: '#D4F044' }}>AIS</span>
           </span>
           <p
             className="text-xs"
@@ -46,7 +46,7 @@ export default function Footer() {
               color: '#888480',
             }}
           >
-            © 2025 Relentless AI. All Rights Reserved.
+            © 2025 Relentless AIS. All Rights Reserved.
           </p>
         </div>
 
